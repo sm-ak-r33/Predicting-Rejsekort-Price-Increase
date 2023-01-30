@@ -12,3 +12,7 @@ financial metrics:
 All results need to be presented as vectors.
 Results for dollar values need to be calculated with $0.01 precision, but need to be presented in Units of $1,000 (i.e. 1k) with no decimal points.
 Results for the profit margin ratio need to be presented in units of % with no decimal points.
+
+
+Answer:
+
