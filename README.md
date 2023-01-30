@@ -16,3 +16,4 @@ Results for the profit margin ratio need to be presented in units of % with no d
 
 Answer:
 
+![ED](R.JPG)
