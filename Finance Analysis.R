@@ -72,5 +72,7 @@ M <- rbind(
 )
 
 #Print The Matrix
+
+print ('the matrix is')
 M
 
