@@ -1,5 +1,4 @@
 # Predicting-Rejsekort-Journeys-2023
-![rejsekort (1)_page-0001](https://github.com/sm-ak-r33/Predicting-Rejsekort-Journeys-2023/assets/116037698/82f2e561-8f4a-4c05-8dfa-7e303ad5d9fc)
 ![rejsekort (1)_page-0002](https://github.com/sm-ak-r33/Predicting-Rejsekort-Journeys-2023/assets/116037698/df142ca7-d26e-43ed-a084-8b4ff54483b3)
 ![rejsekort (1)_page-0003](https://github.com/sm-ak-r33/Predicting-Rejsekort-Journeys-2023/assets/116037698/9b24952c-6be9-43b0-aab0-2a3d9fa2ac49)
 ![rejsekort (1)_page-0004](https://github.com/sm-ak-r33/Predicting-Rejsekort-Journeys-2023/assets/116037698/5ea962e2-a0ea-4a49-8ce8-9b855ae2b72c)
