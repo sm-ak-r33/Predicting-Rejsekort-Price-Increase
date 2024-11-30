@@ -204,7 +204,6 @@ print(breakpoints)
 
 #breaks Ignored
 
-
 ###############################
 #Fitting Seasonal ARIMA model
 
@@ -243,25 +242,3 @@ summary(ts_mod1)
 
 accuracy(forecast_values1,test)
 
-#The ETS Model
-
-ets_model <- ets(train)
-summary(ets_model)
-ets_model$par
-
-forecast_results2 <- forecast(ets_model, h = 365)
-plot(forecast_results2)
-lines(subset_data, col = "black")  # Original data in blue
-
-checkresiduals(ets_model)
-
-accuracy(forecast_results2,test)
-
-#Choosing the best model to predict total journeys of 2023
-horizon <- 365+222
-
-Journeys2022to2023end <- forecast(ts_mod1, h = horizon)
-Journeys2022to2023end
-
-sum_2023 <- sum(tail(Journeys2022to2023end$mean, 365))
-sum_2023
