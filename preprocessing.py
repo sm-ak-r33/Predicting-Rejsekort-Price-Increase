@@ -20,10 +20,9 @@ if __name__ == "__main__":
             "Unable to download training & test excel, check your internet connection. Error: %s", e
         )
 
-
     # Read the wine-quality csv file from the URL
     updated_xlsx_url = (
-        "https://github.com/sm-ak-r33/Predicting-Rejsekort-Price-Increase-2023/raw/refs/heads/main/Data.xlsx"
+        "https://github.com/sm-ak-r33/Predicting-Rejsekort-Price-Increase-2023/raw/refs/heads/main/Data(update).xlsx"
     )
     try:
         data_update = pd.read_excel(updated_xlsx_url)
@@ -31,7 +30,6 @@ if __name__ == "__main__":
         logger.exception(
             "Unable to download training & test excel, check your internet connection. Error: %s", e
         )
-
 
 def clean_dataframe(df):
     """
