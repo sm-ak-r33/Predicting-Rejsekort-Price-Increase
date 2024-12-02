@@ -1,0 +1,57 @@
+schema: '2.0'
+stages:
+  script1:
+    cmd: python pipeline/preprocessing.py
+    deps:
+    - path: Data(update).xlsx
+      hash: md5
+      md5: 74d25e9de9bb675eaef05be24a425b42
+      size: 13034
+    - path: pipeline/preprocessing.py
+      hash: md5
+      md5: 2106bafe2edf8a838dd311929b95a4e5
+      size: 2888
+  script2:
+    cmd: python pipeline/selected_arima.py
+    deps:
+    - path: data_cleaned.csv
+      hash: md5
+      md5: ebf3bfbf09929311aac6182285ad1439
+      size: 84022
+    - path: pipeline/selected_arima.py
+      hash: md5
+      md5: 10f28716042d1520b5c0b509a1672511
+      size: 3726
+  script3:
+    cmd: python pipeline/autoarima.py
+    deps:
+    - path: data_cleaned.csv
+      hash: md5
+      md5: ebf3bfbf09929311aac6182285ad1439
+      size: 84022
+    - path: pipeline/autoarima.py
+      hash: md5
+      md5: e02450c7c6ac50f70526821cffcb551d
+      size: 4334
+  script4:
+    cmd: python pipeline/prophet_model.py
+    deps:
+    - path: data_cleaned.csv
+      hash: md5
+      md5: ebf3bfbf09929311aac6182285ad1439
+      size: 84022
+    - path: pipeline/prophet_model.py
+      hash: md5
+      md5: 9ea4c5bda7d328c3b4735ae5a5cb9336
+      size: 3416
+  script5:
+    cmd: python pipeline/BiLSTM.py
+    deps:
+    - path: data_cleaned.csv
+      hash: md5
+      md5: ebf3bfbf09929311aac6182285ad1439
+      size: 84022
+    - path: pipeline/BiLSTM.py
+      hash: md5
+      md5: 292b026b47180e21991024c097d0c2d6
+      size: 4704

@@ -1,0 +1,33 @@
+stages:
+  script1:
+    cmd: python pipeline/preprocessing.py
+    deps:
+      - Data(update).xlsx   
+      - pipeline/preprocessing.py   
+
+  script2:
+    cmd: python pipeline/selected_arima.py
+    deps:
+      - data_cleaned.csv
+      - pipeline/selected_arima.py
+ 
+
+  script3:
+    cmd: python pipeline/autoarima.py
+    deps:
+      - data_cleaned.csv
+      - pipeline/autoarima.py
+ 
+
+  script4:
+    cmd: python pipeline/prophet_model.py
+    deps:
+      - data_cleaned.csv
+      - pipeline/prophet_model.py
+
+  script5:
+    cmd: python pipeline/BiLSTM.py
+    deps:
+      - data_cleaned.csv
+      - pipeline/BiLSTM.py
+ 

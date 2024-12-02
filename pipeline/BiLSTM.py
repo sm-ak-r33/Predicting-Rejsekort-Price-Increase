@@ -47,7 +47,6 @@ if __name__ == "__main__":
 
         # Preprocessing
         df['date'] = pd.to_datetime(df['date'])
-        df = df[df['date'] >= '2021-01-01'].sort_values(by='date')
 
         value_col = "passengers"
         scaler = MinMaxScaler(feature_range=(0, 1))
@@ -79,10 +78,7 @@ if __name__ == "__main__":
         ])
         model.compile(optimizer='adam', loss='mape')
 
-        # Log custom parameters
-        mlflow.log_param("look_back", look_back)
-        mlflow.log_param("epochs", epochs)
-        mlflow.log_param("batch_size", batch_size)
+ 
 
         # Train the model
         early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
@@ -105,6 +101,14 @@ if __name__ == "__main__":
         mae = mean_absolute_error(y_test, y_pred)
         mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
         r2 = r2_score(y_test, y_pred)
+
+        mlflow.log_param("look_back", look_back)
+        mlflow.log_param("epochs", epochs)
+        mlflow.log_param("batch_size", batch_size)
+        mlflow.log_param("lstm_units_layer1", 128)
+        mlflow.log_param("lstm_units_layer2", 64)
+        mlflow.log_param("dropout_rate", 0.2)
+        mlflow.log_param("optimizer", 'adam(mape)')
         
         # Log metrics
         mlflow.log_metric("rmse", rmse)
@@ -115,9 +119,8 @@ if __name__ == "__main__":
         # Set tracking URI for DagsHub
         dagshub_tracking_uri = "https://dagshub.com/smahasanulkarim/Predicting-Rejsekort-Price-Increase-2023.mlflow"
         mlflow.set_tracking_uri(dagshub_tracking_uri)
-
         # Specify the model file format (keras_model_kwargs)
-        keras_model_kwargs = {"save_format": "h5"} 
+        keras_model_kwargs = {"save_format": "h5"}  # You can use "keras" or "h5" format
         mlflow.tensorflow.log_model(model, "model", keras_model_kwargs=keras_model_kwargs)
 
         # Print metrics

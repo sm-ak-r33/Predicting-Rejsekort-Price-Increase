@@ -14,4 +14,5 @@ tensorflow==2.18.0
 mlflow==2.2.2
 dagshub
 pmdarima
+dvc
  
