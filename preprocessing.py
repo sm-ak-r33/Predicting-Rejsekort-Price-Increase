@@ -9,7 +9,7 @@ if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     np.random.seed(40)
 
-    # Read the wine-quality csv file from the URL
+    # Read the rejsekort csv file from the URL
     xlsx_url = (
         "https://github.com/sm-ak-r33/Predicting-Rejsekort-Price-Increase-2023/raw/refs/heads/main/Data.xlsx"
     )

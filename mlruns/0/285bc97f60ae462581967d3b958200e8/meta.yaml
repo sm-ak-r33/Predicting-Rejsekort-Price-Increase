@@ -1,0 +1,15 @@
+artifact_uri: file:///I:/Personal%20MLOps%20LLMOps%20Projects/Predicting-Rejsekort-Price-Increase-2023/mlruns/0/285bc97f60ae462581967d3b958200e8/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 285bc97f60ae462581967d3b958200e8
+run_name: melodic-boar-986
+run_uuid: 285bc97f60ae462581967d3b958200e8
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1733167258924
+status: 1
+tags: []
+user_id: ahasa

@@ -1,0 +1,15 @@
+artifact_uri: file:///I:/Personal%20MLOps%20LLMOps%20Projects/Predicting-Rejsekort-Price-Increase-2023/mlruns/0/6c721c7280c1416d88fbabf1713f1d77/artifacts
+end_time: 1733166135035
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 6c721c7280c1416d88fbabf1713f1d77
+run_name: respected-horse-50
+run_uuid: 6c721c7280c1416d88fbabf1713f1d77
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1733165865465
+status: 4
+tags: []
+user_id: ahasa
