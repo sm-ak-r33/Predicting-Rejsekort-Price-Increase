@@ -1,0 +1,15 @@
+artifact_uri: file:///I:/Personal%20MLOps%20LLMOps%20Projects/Predicting-Rejsekort-Price-Increase-2023/mlruns/0/4b0accd03ae141e48657ce3bab911fbc/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 4b0accd03ae141e48657ce3bab911fbc
+run_name: invincible-panda-134
+run_uuid: 4b0accd03ae141e48657ce3bab911fbc
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1733153982328
+status: 1
+tags: []
+user_id: ahasa

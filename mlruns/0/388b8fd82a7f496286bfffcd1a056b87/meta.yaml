@@ -1,0 +1,15 @@
+artifact_uri: file:///I:/Personal%20MLOps%20LLMOps%20Projects/Predicting-Rejsekort-Price-Increase-2023/mlruns/0/388b8fd82a7f496286bfffcd1a056b87/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 388b8fd82a7f496286bfffcd1a056b87
+run_name: vaunted-yak-360
+run_uuid: 388b8fd82a7f496286bfffcd1a056b87
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1733147480867
+status: 1
+tags: []
+user_id: ahasa

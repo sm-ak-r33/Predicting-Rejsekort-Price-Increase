@@ -1,0 +1,15 @@
+artifact_uri: file:///I:/Personal%20MLOps%20LLMOps%20Projects/Predicting-Rejsekort-Price-Increase-2023/mlruns/0/b2561f24f7e340acb8aa93ba35bbb273/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: b2561f24f7e340acb8aa93ba35bbb273
+run_name: funny-rook-163
+run_uuid: b2561f24f7e340acb8aa93ba35bbb273
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1733146832645
+status: 1
+tags: []
+user_id: ahasa

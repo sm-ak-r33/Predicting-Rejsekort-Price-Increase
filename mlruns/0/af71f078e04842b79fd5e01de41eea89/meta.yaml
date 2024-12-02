@@ -1,0 +1,15 @@
+artifact_uri: file:///I:/Personal%20MLOps%20LLMOps%20Projects/Predicting-Rejsekort-Price-Increase-2023/mlruns/0/af71f078e04842b79fd5e01de41eea89/artifacts
+end_time: 1733146575491
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: af71f078e04842b79fd5e01de41eea89
+run_name: learned-fawn-61
+run_uuid: af71f078e04842b79fd5e01de41eea89
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1733146575128
+status: 4
+tags: []
+user_id: ahasa

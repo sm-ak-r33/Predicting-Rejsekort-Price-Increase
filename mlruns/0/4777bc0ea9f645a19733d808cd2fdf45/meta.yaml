@@ -1,0 +1,15 @@
+artifact_uri: file:///I:/Personal%20MLOps%20LLMOps%20Projects/Predicting-Rejsekort-Price-Increase-2023/mlruns/0/4777bc0ea9f645a19733d808cd2fdf45/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 4777bc0ea9f645a19733d808cd2fdf45
+run_name: bold-worm-697
+run_uuid: 4777bc0ea9f645a19733d808cd2fdf45
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1733155192188
+status: 1
+tags: []
+user_id: ahasa
