@@ -22,7 +22,7 @@ conda env create -f rejse_environment.yml
 conda activate rejse
 ```
 
-# Run This After Ingesting New Data for Pipeline Automation
+# After Ingesting New Data for Pipeline Automation
 ``` bash
 dvc init
 ```
