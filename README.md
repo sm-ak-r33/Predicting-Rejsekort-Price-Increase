@@ -17,7 +17,7 @@ Project repo: https://github.com/sm-ak-r33/Herbal-EcoDoc.git
 conda env create -f rejse_environment.yml
 ```
 
-# Create the environment from the yml file
+# Activate the environment from the yml file
 ``` bash
 conda activate rejse
 ```
