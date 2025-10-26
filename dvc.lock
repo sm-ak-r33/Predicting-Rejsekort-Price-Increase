@@ -5,8 +5,8 @@ stages:
     deps:
     - path: Data(update).xlsx
       hash: md5
-      md5: 7eede00e2f40b811a3f8d51d3e1c6923
-      size: 13063
+      md5: 6cca61db5aa2b9e94e86780c31849887
+      size: 19033
     - path: pipeline/preprocessing.py
       hash: md5
       md5: 2106bafe2edf8a838dd311929b95a4e5
@@ -16,8 +16,8 @@ stages:
     deps:
     - path: data_cleaned.csv
       hash: md5
-      md5: ebf3bfbf09929311aac6182285ad1439
-      size: 84022
+      md5: 3cc90a0b0c86e1e3c008e0babfe7e749
+      size: 84043
     - path: pipeline/selected_arima.py
       hash: md5
       md5: 10f28716042d1520b5c0b509a1672511
@@ -27,8 +27,8 @@ stages:
     deps:
     - path: data_cleaned.csv
       hash: md5
-      md5: ebf3bfbf09929311aac6182285ad1439
-      size: 84022
+      md5: 3cc90a0b0c86e1e3c008e0babfe7e749
+      size: 84043
     - path: pipeline/autoarima.py
       hash: md5
       md5: e02450c7c6ac50f70526821cffcb551d
@@ -38,8 +38,8 @@ stages:
     deps:
     - path: data_cleaned.csv
       hash: md5
-      md5: ebf3bfbf09929311aac6182285ad1439
-      size: 84022
+      md5: 3cc90a0b0c86e1e3c008e0babfe7e749
+      size: 84043
     - path: pipeline/prophet_model.py
       hash: md5
       md5: 9ea4c5bda7d328c3b4735ae5a5cb9336
@@ -49,8 +49,8 @@ stages:
     deps:
     - path: data_cleaned.csv
       hash: md5
-      md5: ebf3bfbf09929311aac6182285ad1439
-      size: 84022
+      md5: 3cc90a0b0c86e1e3c008e0babfe7e749
+      size: 84043
     - path: pipeline/BiLSTM.py
       hash: md5
       md5: 292b026b47180e21991024c097d0c2d6
