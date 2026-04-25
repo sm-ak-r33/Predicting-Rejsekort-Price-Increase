@@ -1,23 +1,34 @@
 stages:
+
+  # ── Stage 0: automated data ingestion from passagertal.dk ──────────────────
+  ingest:
+    cmd: python pipeline/ingest.py
+    deps:
+      - pipeline/ingest.py
+    outs:
+      - Data(update).xlsx   # replaces the manually maintained file
+
+  # ── Stage 1: preprocessing (unchanged) ─────────────────────────────────────
   script1:
     cmd: python pipeline/preprocessing.py
     deps:
-      - Data(update).xlsx   
-      - pipeline/preprocessing.py   
+      - Data(update).xlsx
+      - pipeline/preprocessing.py
+    outs:
+      - data_cleaned.csv
 
+  # ── Modelling stages (unchanged) ───────────────────────────────────────────
   script2:
     cmd: python pipeline/selected_arima.py
     deps:
       - data_cleaned.csv
       - pipeline/selected_arima.py
- 
 
   script3:
     cmd: python pipeline/autoarima.py
     deps:
       - data_cleaned.csv
       - pipeline/autoarima.py
- 
 
   script4:
     cmd: python pipeline/prophet_model.py
@@ -30,4 +41,5 @@ stages:
     deps:
       - data_cleaned.csv
       - pipeline/BiLSTM.py
- 
+    outs:
+      - output.png   # latest forecast plot — committed to git for README
