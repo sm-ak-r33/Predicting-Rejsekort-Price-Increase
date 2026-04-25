@@ -1,25 +1,25 @@
 # Predicting Rejsekort Journeys — From 2023
 
 An MLflow experiment-tracking project comparing four forecasting models on
-Rejsekort passenger journey data.  Results are tracked on
+Rejsekort passenger journey data. Results are tracked on
 [DagsHub](https://dagshub.com/smahasanulkarim/Predicting-Rejsekort-Price-Increase-2023.mlflow/#/compare-runs?runs=%5B%22b701e3cfda5647ab984e1c73733e0c45%22,%222c785a791b244b35b0c55fc33185d45d%22,%222a7a92eecfbe4f2d9910664a5dd1a21d%22,%22d5ba1442340c49c9badafad18e73ad20%22%5D&experiments=%5B%220%22%5D).
 
 ---
 
-## Latest forecast (updated automatically on every run)
+## Latest Forecast
 
 ![Latest forecast output](output.png)
 
-> This image is regenerated and committed by the
-> [nightly GitHub Actions workflow](.github/workflows/nightly.yml) every time
-> the pipeline runs, so it always reflects the most recent data from
+> This image is regenerated and committed automatically every time the pipeline
+> runs via the [nightly GitHub Actions workflow](.github/workflows/nightly.yml),
+> so it always reflects the most recent data from
 > [passagertal.dk](https://passagertal.dk).
 
 ---
 
-## Feature-engineering details
+## Feature Engineering
 
-Full description of statistical features used by the models:
+Full description of the statistical features used by the models:
 [rejsekort.pdf](rejsekort.pdf)
 
 ---
@@ -40,15 +40,15 @@ conda env create -f rejse_environment.yml
 conda activate rejse
 ```
 
-### 3 — Install Playwright (required for data ingestion)
+### 3 — Install the ingestion dependency
 
 ```bash
-playwright install chromium
+pip install requests
 ```
 
 ---
 
-## Running the pipeline
+## Running the Pipeline
 
 ### Full automated run (ingest → preprocess → models)
 
@@ -72,36 +72,33 @@ dvc dag
 
 ---
 
-## Data ingestion — how it works
+## Data Ingestion
 
-Data is sourced from the public TARGIT Anywhere dashboard at
-[passagertal.dk](https://passagertal.dk/Embed#vfs://Global/passagertal.dk/Rejsekort/Rejsekortrejser.xview).
+Data is sourced from the public dashboard at
+[passagertal.dk](https://passagertal.dk/Embed#vfs://Global/passagertal.dk/Rejsekort/Rejsekortrejser.xview),
+which is powered by TARGIT Anywhere (v26.3).
 
-Because passagertal.dk does not expose a public REST API, **`pipeline/ingest.py`**
-uses [Playwright](https://playwright.dev/python/) (a headless browser) to:
+`pipeline/ingest.py` calls the TARGIT `GetModel` endpoint directly:
 
-1. Open the TARGIT Anywhere dashboard in a headless Chromium browser.
-2. Wait for the dashboard to render its first visualisation.
-3. Click the built-in **Export to Excel** button in TARGIT's toolbar.
-4. Save the downloaded file as `Data(update).xlsx`, which feeds the rest of
-   the DVC pipeline unchanged.
+```
+POST https://passagertal.dk/Visual/GetModel
+     ?ObjectId=%7BD87FA879-800A-498F-A9F7-0BFFE899D24E%7D
+```
 
-As a fallback, the script intercepts TARGIT's internal XHR data calls and
-replays them with an Excel `Accept` header — useful if the export button
-cannot be located in a future version of the dashboard.
+The response is JSON containing the full dataset as a base64-encoded Excel file
+in `Model.Content`. The script decodes it and saves it as `Data(update).xlsx`,
+which feeds the rest of the pipeline unchanged. No browser or Playwright needed —
+just `requests`.
 
-> **Troubleshooting:** If the export fails, open the dashboard manually in a
-> browser, open DevTools → Network, and look for requests to
-> `/anywhere/api/data` or `/DataService`.  Update the URL patterns in
-> `ingest.py` accordingly.
+Current dataset: **392 rows**, filtered to `<= Previous year (2025)`.
 
 ---
 
-## Pipeline stages (`dvc.yaml`)
+## Pipeline Stages
 
 | Stage | Script | Input | Output |
 |---|---|---|---|
-| `ingest` | `pipeline/ingest.py` | passagertal.dk dashboard | `Data(update).xlsx` |
+| `ingest` | `pipeline/ingest.py` | passagertal.dk API | `Data(update).xlsx` |
 | `script1` | `pipeline/preprocessing.py` | `Data(update).xlsx` | `data_cleaned.csv` |
 | `script2` | `pipeline/selected_arima.py` | `data_cleaned.csv` | MLflow run |
 | `script3` | `pipeline/autoarima.py` | `data_cleaned.csv` | MLflow run |
@@ -110,13 +107,12 @@ cannot be located in a future version of the dashboard.
 
 ---
 
-## Automated nightly refresh (GitHub Actions)
+## Automated Nightly Refresh
 
 The workflow in `.github/workflows/nightly.yml` runs every night at 04:00 UTC:
 
-1. Installs all dependencies including Playwright + Chromium.
-2. Runs `dvc repro --force` to fetch fresh data and re-run all models.
-3. Commits the updated `output.png` back to the repository so the plot
-   in this README always shows the latest results.
+1. Installs all dependencies
+2. Runs `dvc repro --force` to fetch fresh data and re-run all models
+3. Commits the updated `output.png` back to the repository
 
-You can also trigger it manually from the **Actions** tab in GitHub.
+You can also trigger it manually from the **Actions** tab on GitHub.
