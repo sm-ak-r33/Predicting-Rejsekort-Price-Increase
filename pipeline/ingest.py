@@ -3,41 +3,43 @@ ingest.py
 ---------
 Automated data ingestion from passagertal.dk (TARGIT Anywhere v26.3).
 
-Confirmed endpoint (Chrome DevTools):
-    POST https://passagertal.dk/Visual/GetModel
-         ?ObjectId=%7BD87FA879-800A-498F-A9F7-0BFFE899D24E%7D
-
-The response JSON has this structure:
-    {
-        "State": { ... },          # chart metadata, criteria, row/col counts
-        "Model": {
-            "ContentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "Content": "<base64>"  # the complete .xlsx file, base64-encoded
-        }
-    }
-
-We decode Model.Content and write it directly to Data(update).xlsx.
-No browser, no Playwright, no export button — one HTTP call does everything.
+The dashboard contains a crosstab table with a Year → Month → Day hierarchy.
+Clicking the "+" next to each year/month expands it to daily data.
+This script:
+  1. Opens the dashboard in headless Chromium
+  2. Clicks ALL "+" expand buttons repeatedly until no more appear
+     (Year → Month → Day, fully expanded)
+  3. Captures the resulting GetModel response which contains daily data
+  4. Parses Model.Rows → pandas DataFrame → Data(update).xlsx
 
 Usage:
     python pipeline/ingest.py
 
 Requirements:
-    requests>=2.31
+    playwright>=1.44   (pip install playwright && playwright install chromium)
+    pandas>=2.0        (pip install pandas)
+    openpyxl>=3.1      (pip install openpyxl)
 """
 
-import base64
+import asyncio
+import json
 import logging
-import requests
 from pathlib import Path
+
+import pandas as pd
+from typing import Dict
+from playwright.async_api import async_playwright, Response
 
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-BASE_URL     = "https://passagertal.dk"
-GETMODEL_URL = f"{BASE_URL}/Visual/GetModel"
-OBJECT_ID    = "%7BD87FA879-800A-498F-A9F7-0BFFE899D24E%7D"   # {D87FA879-...}
-OUTPUT_PATH  = Path("Data(update).xlsx")
+DASHBOARD_URL = (
+    "https://passagertal.dk/Embed"
+    "#vfs://Global/passagertal.dk/Rejsekort/Rejsekortrejser.xview"
+)
+GETMODEL_PATH = "/Visual/GetModel"
+OUTPUT_XLSX   = Path("Data(update).xlsx")
+TIMEOUT_S     = 180
 
 logging.basicConfig(
     level=logging.INFO,
@@ -45,86 +47,196 @@ logging.basicConfig(
 )
 log = logging.getLogger("ingest")
 
-SESSION = requests.Session()
-SESSION.headers.update({
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
-    ),
-    "Referer":      f"{BASE_URL}/Embed",
-    "Origin":       BASE_URL,
-    "Content-Type": "application/json",
-    "Accept":       "application/json, text/plain, */*",
-})
+# ---------------------------------------------------------------------------
+# Track ALL GetModel responses, keyed by ObjectId
+# We want the one with the most rows (= most drilled-down = daily data)
+# ---------------------------------------------------------------------------
+all_responses: Dict[str, dict] = {}   # objectId → latest response body
 
 
-def prime_session() -> None:
-    """
-    Load the dashboard page once so TARGIT sets any required session cookies
-    before we call GetModel directly.
-    """
-    url = (
-        f"{BASE_URL}/Embed"
-        "#vfs://Global/passagertal.dk/Rejsekort/Rejsekortrejser.xview"
-    )
-    log.info("Priming session …")
-    SESSION.get(url, timeout=30).raise_for_status()
-    log.info("Cookies: %s", list(SESSION.cookies.keys()))
+def object_id_from_url(url: str) -> str:
+    """Extract the raw GUID from a GetModel URL."""
+    import re
+    m = re.search(r"ObjectId=%7B([^%]+)%7D", url, re.IGNORECASE)
+    return m.group(1) if m else url
 
 
-def fetch_and_save() -> None:
-    """POST to GetModel, decode the base64 Excel payload, write to disk."""
-    log.info("Calling GetModel …")
-    resp = SESSION.post(
-        GETMODEL_URL,
-        params={"ObjectId": OBJECT_ID},
-        timeout=60,
-    )
-    resp.raise_for_status()
-    body = resp.json()
+async def handle_response(response: Response) -> None:
+    if GETMODEL_PATH not in response.url:
+        return
+    if response.status != 200:
+        return
+    try:
+        body = await response.json()
+    except Exception:
+        return
 
-    model = body.get("Model", {})
-    content_type = model.get("ContentType", "")
-    content_b64  = model.get("Content", "")
+    oid       = object_id_from_url(response.url)
+    state     = body.get("State", {})
+    row_count = state.get("CrosstabRowCount", 0)
+    title     = body.get("Model", {}).get("Title", "")
 
-    if not content_b64:
-        raise ValueError(
-            "GetModel response contained no 'Model.Content' field.\n"
-            f"Top-level keys returned: {list(body.keys())}\n"
-            f"Model keys: {list(model.keys())}"
-        )
-
-    log.info("Content-Type: %s", content_type)
-    log.info("Base64 payload length: %d chars", len(content_b64))
-
-    xlsx_bytes = base64.b64decode(content_b64)
-
-    # Sanity check: xlsx files are ZIP archives and start with PK\x03\x04
-    if not xlsx_bytes[:4] == b"PK\x03\x04":
-        raise ValueError(
-            f"Decoded content does not look like an xlsx file "
-            f"(magic bytes: {xlsx_bytes[:4]!r}). "
-            "Check data_raw.json for the raw response."
-        )
-
-    OUTPUT_PATH.write_bytes(xlsx_bytes)
-    log.info("Saved %d bytes → %s", len(xlsx_bytes), OUTPUT_PATH)
-
-    # Log what TARGIT tells us about the data (from State metadata)
-    state = body.get("State", {})
     log.info(
-        "Dataset: %d rows × %d cols  |  Criteria: %s",
-        state.get("CrosstabRowCount", "?"),
-        state.get("CrosstabColCount", "?"),
-        state.get("CriteriaText", "?"),
+        "GetModel  rows=%-5s  title='%s'  id=%s",
+        row_count, title[:50], oid[:8] + "…"
+    )
+    all_responses[oid] = body
+
+
+# ---------------------------------------------------------------------------
+# Click all expand ("+" drill-down) buttons visible on the page
+# Returns the number of buttons clicked
+# ---------------------------------------------------------------------------
+async def click_all_expand_buttons(page) -> int:
+    """
+    TARGIT renders expand/collapse controls as elements that:
+      - contain the text "+" or "−"
+      - OR have a CSS class containing 'expand', 'drill', 'toggle', 'open'
+      - OR are <td>/<span> with role="button" or a click handler
+
+    We try several selectors and click every visible one.
+    """
+    selectors = [
+        # Text content "+"
+        "text=+",
+        # Common TARGIT expand class patterns
+        "[class*='expand']",
+        "[class*='drill']",
+        "[class*='toggle']",
+        "[class*='lsExpand']",
+        "[class*='lsDrill']",
+        "[class*='tg-expand']",
+        # SVG/icon expand arrows
+        "svg[class*='expand']",
+        "span[class*='expand']",
+        "div[class*='expand']",
+        "td[class*='expand']",
+    ]
+
+    clicked = 0
+    for sel in selectors:
+        try:
+            elements = await page.locator(sel).all()
+            for el in elements:
+                try:
+                    if await el.is_visible():
+                        await el.click(timeout=2000)
+                        clicked += 1
+                        await asyncio.sleep(0.3)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    return clicked
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+async def ingest() -> None:
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-setuid-sandbox"],
+        )
+        context = await browser.new_context(
+            locale="da-DK",
+            viewport={"width": 1920, "height": 1080},
+        )
+        page = await context.new_page()
+        page.on("response", handle_response)
+
+        # ── 1. Load dashboard ────────────────────────────────────────────────
+        log.info("Opening dashboard …")
+        await page.goto(DASHBOARD_URL, wait_until="networkidle", timeout=TIMEOUT_S * 1000)
+        log.info("Page loaded. Objects captured so far: %d", len(all_responses))
+        await asyncio.sleep(3)
+
+        # ── 2. Drill down: click "+" buttons up to 3 levels deep ────────────
+        #    Level 1: expand years  → months appear
+        #    Level 2: expand months → days appear
+        #    Level 3: expand any remaining collapsed nodes
+        for level in range(1, 4):
+            log.info("Drill level %d — looking for expand buttons …", level)
+            n = await click_all_expand_buttons(page)
+            log.info("Clicked %d expand button(s) at level %d", n, level)
+            if n == 0:
+                log.info("No more expand buttons found — drill complete.")
+                break
+            # Wait for TARGIT to fire new GetModel requests after expansion
+            await page.wait_for_load_state("networkidle", timeout=30_000)
+            await asyncio.sleep(3)
+
+        log.info("Total GetModel responses captured: %d", len(all_responses))
+        await browser.close()
+
+    # ── 3. Pick the response with the most rows (= daily data) ──────────────
+    if not all_responses:
+        raise RuntimeError("No GetModel responses captured at all.")
+
+    best_oid, best_body = max(
+        all_responses.items(),
+        key=lambda kv: kv[1].get("State", {}).get("CrosstabRowCount", 0),
+    )
+    best_rows = best_body.get("State", {}).get("CrosstabRowCount", 0)
+    best_title = best_body.get("Model", {}).get("Title", "")
+    log.info(
+        "Using object %s — '%s' (%d rows)",
+        best_oid[:8] + "…", best_title, best_rows
     )
 
+    # Save raw JSON for debugging
+    Path("data_raw.json").write_text(
+        json.dumps(best_body, indent=2, ensure_ascii=False)
+    )
 
-def main() -> None:
-    prime_session()
-    fetch_and_save()
+    # ── 4. Parse Model.Rows → DataFrame ─────────────────────────────────────
+    df = parse_rows(best_body)
+    df.to_excel(OUTPUT_XLSX, index=False)
+    log.info("Saved %d rows → %s", len(df), OUTPUT_XLSX)
+
+
+# ---------------------------------------------------------------------------
+# Parse Model.Rows into a tidy DataFrame
+# ---------------------------------------------------------------------------
+def parse_rows(body: dict) -> pd.DataFrame:
+    model   = body.get("Model", {})
+    rows    = model.get("Rows", [])
+    columns = model.get("Columns", [])
+
+    if not rows:
+        raise ValueError(
+            "Model.Rows is empty. Check data_raw.json for the response structure."
+        )
+
+    col_names = [
+        c.get("Member", {}).get("ClickableLabel", {}).get("LabelText", f"Col_{i}")
+        for i, c in enumerate(columns)
+    ] or ["Antal Personrejser"]
+
+    records = []
+    for row in rows:
+        label = (
+            row.get("Member", {})
+               .get("ClickableLabel", {})
+               .get("LabelText", "")
+        )
+        values = row.get("Values", [])
+        record = {"Dato": label}
+        for j, val_obj in enumerate(values):
+            numeric = val_obj.get("NumericValue", {})
+            hint    = val_obj.get("ClickableLabel", {}).get("Clickable", {}).get("HintText", "")
+            measure = col_names[j] if j < len(col_names) else f"Col_{j}"
+            # NumericValue.Value is the raw number; HintText has the formatted string
+            record[measure] = numeric.get("Value") if numeric else hint
+        records.append(record)
+
+    df = pd.DataFrame(records)
+    log.info("Parsed %d rows × %d cols: %s", *df.shape, df.columns.tolist())
+    log.info("Sample:\n%s", df.head(5).to_string(index=False))
+    return df
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(ingest())

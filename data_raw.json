@@ -1,0 +1,1568 @@
+{
+  "State": {
+    "StateUpdateCounter": 8,
+    "ModelUpdateCounter": 4,
+    "ConfigUpdateCounter": 0,
+    "TypeId": "ae84917b-1d37-4aa7-b351-2026247bec04",
+    "State": 7,
+    "PreferredPage": 1,
+    "Explanation": {
+      "Sections": [
+        {
+          "Topic": 0,
+          "Caption": "Søjlediagram viser",
+          "ScrollGroups": [
+            {
+              "Scroll": false,
+              "Lines": [
+                {
+                  "Parts": [
+                    {
+                      "Kind": 1,
+                      "Image": 1,
+                      "Value": null
+                    },
+                    {
+                      "Kind": 0,
+                      "Image": 0,
+                      "Value": " Antal Personrejser per "
+                    },
+                    {
+                      "Kind": 1,
+                      "Image": 10,
+                      "Value": null
+                    },
+                    {
+                      "Kind": 0,
+                      "Image": 0,
+                      "Value": " Afgangsdato År - Måned - Dato "
+                    },
+                    {
+                      "Kind": 1,
+                      "Image": 11,
+                      "Value": null
+                    },
+                    {
+                      "Kind": 0,
+                      "Image": 0,
+                      "Value": " År"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Topic": 4,
+          "Caption": "Lokale kriterier",
+          "ScrollGroups": [
+            {
+              "Scroll": true,
+              "Lines": [
+                {
+                  "Parts": [
+                    {
+                      "Kind": 1,
+                      "Image": 10,
+                      "Value": null
+                    },
+                    {
+                      "Kind": 0,
+                      "Image": 0,
+                      "Value": " Afgangsdato År -  Dato <= Sidste år (2025)"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "HasTrigger": false,
+    "TextMessage": null,
+    "TextMessageDetailLines": [],
+    "ShowCriteria": false,
+    "ObjHiddenByState": false,
+    "CriteriaText": "<= Sidste år (2025)",
+    "CrosstabColCount": 2,
+    "CrosstabRowCount": 15,
+    "ColHeaderRowCount": 1,
+    "RowHeaderColCount": 1,
+    "Actions": [
+      {
+        "Action": 1,
+        "Hint": "Hent data",
+        "Enabled": false
+      },
+      {
+        "Action": 2,
+        "Hint": "Definér",
+        "Enabled": false
+      },
+      {
+        "Action": 3,
+        "Hint": "Egenskaber",
+        "Enabled": false
+      },
+      {
+        "Action": 4,
+        "Hint": "Slet",
+        "Enabled": false
+      },
+      {
+        "Action": 5,
+        "Hint": null,
+        "Enabled": true
+      },
+      {
+        "Action": 6,
+        "Hint": "Fjern fra side",
+        "Enabled": false
+      },
+      {
+        "Action": 7,
+        "Hint": "Maksimér",
+        "Enabled": true
+      },
+      {
+        "Action": 8,
+        "Hint": "Gendan",
+        "Enabled": true
+      },
+      {
+        "Action": 10,
+        "Hint": "Vis forklaring",
+        "Enabled": true
+      },
+      {
+        "Action": 11,
+        "Hint": "Vis diagram",
+        "Enabled": false
+      },
+      {
+        "Action": 12,
+        "Hint": "Vis data",
+        "Enabled": true
+      },
+      {
+        "Action": 13,
+        "Hint": null,
+        "Enabled": true
+      },
+      {
+        "Action": 20,
+        "Hint": "Fjern drill-down",
+        "Enabled": false
+      },
+      {
+        "Action": 21,
+        "Hint": "Åbn niveau",
+        "Enabled": true
+      },
+      {
+        "Action": 22,
+        "Hint": "Luk niveau",
+        "Enabled": false
+      },
+      {
+        "Action": 25,
+        "Hint": "Annullér fremskrivning",
+        "Enabled": false
+      },
+      {
+        "Action": 26,
+        "Hint": "Ét trin frem",
+        "Enabled": true
+      },
+      {
+        "Action": 27,
+        "Hint": "Hurtigt frem",
+        "Enabled": true
+      },
+      {
+        "Action": 28,
+        "Hint": "Fremskrivning ",
+        "Enabled": false
+      },
+      {
+        "Action": 29,
+        "Hint": "Annullér fremskrivning",
+        "Enabled": false
+      },
+      {
+        "Action": 30,
+        "Hint": "Eksportér til Excel",
+        "Enabled": true
+      },
+      {
+        "Action": 31,
+        "Hint": "Aktivér multiple valg",
+        "Enabled": true
+      }
+    ],
+    "IsUpdatingModel": false
+  },
+  "Model": {
+    "Legend": {
+      "Visibility": 0,
+      "TitleText": "",
+      "TitleTextStyle": {
+        "HorizontalAlignment": 1,
+        "VerticalAlignment": 0,
+        "FontName": "Segoe UI",
+        "FontSize": 12.0,
+        "Underline": false,
+        "Bold": false,
+        "Italic": false,
+        "Strikeout": false,
+        "FontColor": "#FF505050"
+      },
+      "HorizontalAlignment": 2,
+      "VerticalAlignment": 1,
+      "ItemTextStyle": {
+        "HorizontalAlignment": 0,
+        "VerticalAlignment": 1,
+        "FontName": "Segoe UI",
+        "FontSize": 12.0,
+        "Underline": false,
+        "Bold": false,
+        "Italic": false,
+        "Strikeout": false,
+        "FontColor": "#FF505050"
+      },
+      "BackgroundColor": "#00FFFFFF",
+      "Custom": null
+    },
+    "Rows": [
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 1,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2013",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2013]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "31.514.757",
+                "CritIdx": 2,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 31514757.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FF38A800",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 3,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2014",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2014]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "50.617.477",
+                "CritIdx": 4,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 50617477.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FF96BE0F",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 5,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2015",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2015]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "85.819.857",
+                "CritIdx": 6,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 85819857.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FFFFC800",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 7,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2016",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2016]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "108.592.496",
+                "CritIdx": 8,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 108592496.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FFF08200",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 9,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2017",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2017]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "129.258.412",
+                "CritIdx": 10,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 129258412.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FFDC0014",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 11,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2018",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2018]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "152.216.427",
+                "CritIdx": 12,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 152216427.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FFC8D700",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 13,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2019",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2019]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "178.811.103",
+                "CritIdx": 14,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 178811103.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FF8C8C8C",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 15,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2020",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2020]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "123.939.120",
+                "CritIdx": 16,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 123939120.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FF70A800",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 17,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2021",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2021]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "133.645.734",
+                "CritIdx": 18,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 133645734.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FFA80000",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 19,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2022",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2022]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "174.812.754",
+                "CritIdx": 20,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 174812754.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FF730000",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 21,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2023",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2023]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "184.021.856",
+                "CritIdx": 22,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 184021856.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FF000000",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 23,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2024",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2024]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "165.024.700",
+                "CritIdx": 24,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 165024700.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FF00AFC8",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      },
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 25,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "2025",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[0,\"[Afgangsdato].[År - Måned - Dato].[År].&[2025]\"]",
+          "Metadata": 0,
+          "MemberProperties": []
+        },
+        "Values": [
+          {
+            "ClickableLabel": {
+              "Clickable": {
+                "HintText": "105.680.243",
+                "CritIdx": 26,
+                "DrillTarget": 1,
+                "DrillState": 0
+              },
+              "LabelText": "",
+              "CustomText": []
+            },
+            "NumericValue": {
+              "Value": 105680243.0,
+              "StrokeColor": "[1,\"m1\"]",
+              "FillColor": "#FFC8C8C8",
+              "StrokeColorOrigin": {
+                "ClickableLabel": {
+                  "Clickable": {
+                    "HintText": "",
+                    "CritIdx": -1,
+                    "DrillTarget": 1,
+                    "DrillState": 3
+                  },
+                  "LabelText": "Antal Personrejser",
+                  "CustomText": null
+                },
+                "IsVisible": true,
+                "Color": "[1,\"m1\"]",
+                "Metadata": 1,
+                "MemberProperties": []
+              },
+              "FillColorOrigin": null,
+              "StrokePalette": -1,
+              "FillPalette": 0,
+              "Agent": -1,
+              "AgentColor": "#00FFFFFF"
+            }
+          }
+        ]
+      }
+    ],
+    "Columns": [
+      {
+        "Member": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": 0,
+              "DrillTarget": 1,
+              "DrillState": 0
+            },
+            "LabelText": "Antal Personrejser",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[1,\"m1\"]",
+          "Metadata": 1,
+          "MemberProperties": []
+        },
+        "StrokeColor": "[1,\"m1\"]",
+        "FillColor": "[1,\"m1\"]",
+        "StrokeColorOrigin": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": -1,
+              "DrillTarget": 1,
+              "DrillState": 3
+            },
+            "LabelText": "Antal Personrejser",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[1,\"m1\"]",
+          "Metadata": 1,
+          "MemberProperties": []
+        },
+        "FillColorOrigin": {
+          "ClickableLabel": {
+            "Clickable": {
+              "HintText": "",
+              "CritIdx": -1,
+              "DrillTarget": 1,
+              "DrillState": 3
+            },
+            "LabelText": "Antal Personrejser",
+            "CustomText": null
+          },
+          "IsVisible": true,
+          "Color": "[1,\"m1\"]",
+          "Metadata": 1,
+          "MemberProperties": []
+        },
+        "StrokePalette": -1,
+        "FillPalette": -1,
+        "LabelConfig": {
+          "IsEnabled": false,
+          "TextStyle": {
+            "HorizontalAlignment": 1,
+            "VerticalAlignment": 1,
+            "FontName": "Segoe UI",
+            "FontSize": 12.0,
+            "Underline": false,
+            "Bold": false,
+            "Italic": false,
+            "Strikeout": false,
+            "FontColor": "#FF505050"
+          }
+        },
+        "HintConfig": {
+          "IsEnabled": true,
+          "TextStyle": {
+            "HorizontalAlignment": 1,
+            "VerticalAlignment": 1,
+            "FontName": "Segoe UI",
+            "FontSize": 12.0,
+            "Underline": false,
+            "Bold": false,
+            "Italic": false,
+            "Strikeout": false,
+            "FontColor": "#FF505050"
+          }
+        },
+        "CustomTextStyles": [],
+        "IncludeFillColorInLegend": true,
+        "IncludeStrokeColorInLegend": true,
+        "IsFillColorAutomatic": true,
+        "IsStrokeColorAutomatic": true,
+        "IsRowFillColorAutomatic": false,
+        "IsRowStrokeColorAutomatic": true,
+        "NumericAxis": 0,
+        "ColumnType": 0,
+        "SeriesIdx": 0,
+        "Custom": {
+          "ColumnOptions": {
+            "LabelPlacement": 0,
+            "LabelRotation": 0
+          },
+          "SeriesOptions": {
+            "ChartType": 0,
+            "MarkerSize": 2,
+            "MarkerType": 0,
+            "LineStyle": {
+              "Thickness": 2.0,
+              "Style": 0,
+              "Color": "#FF808080"
+            }
+          }
+        }
+      }
+    ],
+    "NumericAxes": [
+      {
+        "IsEnabled": true,
+        "TitleText": "",
+        "TitleTextConfig": {
+          "IsEnabled": false,
+          "TextStyle": {
+            "HorizontalAlignment": 1,
+            "VerticalAlignment": 1,
+            "FontName": "Segoe UI",
+            "FontSize": 12.0,
+            "Underline": false,
+            "Bold": false,
+            "Italic": false,
+            "Strikeout": false,
+            "FontColor": "#FF505050"
+          }
+        },
+        "Min": 0,
+        "Max": 0,
+        "TickLabelInterval": 0,
+        "CustomMin": 0.0,
+        "CustomMax": 0.0,
+        "CustomTickLabelInterval": 0.0,
+        "LowerOutlierThreshold": "NaN",
+        "UpperOutlierThreshold": "NaN",
+        "TickLabelAngle": null,
+        "TickLabelConfig": {
+          "IsEnabled": true,
+          "TextStyle": {
+            "HorizontalAlignment": 1,
+            "VerticalAlignment": 1,
+            "FontName": "Segoe UI",
+            "FontSize": 12.0,
+            "Underline": false,
+            "Bold": false,
+            "Italic": false,
+            "Strikeout": false,
+            "FontColor": "#FF505050"
+          }
+        },
+        "NumberFormat": {
+          "Format": "0.#;;0",
+          "AsTime": false,
+          "AbbreviateBMK": true,
+          "SourceTimeUnit": 0,
+          "DisplayTimeUnit": 4,
+          "IsoLocale": "da-dk",
+          "CurrencyIsoLocale": "da",
+          "CurrencyIso4217": "DKK",
+          "DecimalSeparator": ",",
+          "ThousandSeparator": ".",
+          "TimeSeparator": ":",
+          "AbbrB": "mia.",
+          "AbbrM": "mio.",
+          "AbbrK": "k"
+        },
+        "Custom": {
+          "NumericAxisOptions": {
+            "Size": 0,
+            "LineStyle": {
+              "Thickness": 0.5,
+              "Style": 0,
+              "Color": "#FFA1A8AD"
+            },
+            "GridLineStyle": {
+              "Thickness": 0.5,
+              "Style": 0,
+              "Color": "#FFA1A8AD"
+            }
+          }
+        },
+        "Tag": null
+      },
+      {
+        "IsEnabled": true,
+        "TitleText": "",
+        "TitleTextConfig": {
+          "IsEnabled": false,
+          "TextStyle": {
+            "HorizontalAlignment": 1,
+            "VerticalAlignment": 1,
+            "FontName": "Segoe UI",
+            "FontSize": 12.0,
+            "Underline": false,
+            "Bold": false,
+            "Italic": false,
+            "Strikeout": false,
+            "FontColor": "#FF505050"
+          }
+        },
+        "Min": 0,
+        "Max": 0,
+        "TickLabelInterval": 0,
+        "CustomMin": 0.0,
+        "CustomMax": 0.0,
+        "CustomTickLabelInterval": 0.0,
+        "LowerOutlierThreshold": "NaN",
+        "UpperOutlierThreshold": "NaN",
+        "TickLabelAngle": null,
+        "TickLabelConfig": {
+          "IsEnabled": true,
+          "TextStyle": {
+            "HorizontalAlignment": 1,
+            "VerticalAlignment": 1,
+            "FontName": "Segoe UI",
+            "FontSize": 12.0,
+            "Underline": false,
+            "Bold": false,
+            "Italic": false,
+            "Strikeout": false,
+            "FontColor": "#FF505050"
+          }
+        },
+        "NumberFormat": {
+          "Format": "0.#;;0",
+          "AsTime": false,
+          "AbbreviateBMK": true,
+          "SourceTimeUnit": 0,
+          "DisplayTimeUnit": 4,
+          "IsoLocale": "da-dk",
+          "CurrencyIsoLocale": "da",
+          "CurrencyIso4217": "DKK",
+          "DecimalSeparator": ",",
+          "ThousandSeparator": ".",
+          "TimeSeparator": ":",
+          "AbbrB": "mia.",
+          "AbbrM": "mio.",
+          "AbbrK": "k"
+        },
+        "Custom": {
+          "NumericAxisOptions": {
+            "Size": 0,
+            "LineStyle": {
+              "Thickness": 1.0,
+              "Style": 0,
+              "Color": "#FFA1A8AD"
+            },
+            "GridLineStyle": {
+              "Thickness": 0.0,
+              "Style": 0,
+              "Color": "#FFA1A8AD"
+            }
+          }
+        },
+        "Tag": null
+      }
+    ],
+    "MemberAxis": {
+      "TitleText": "",
+      "TitleTextConfig": {
+        "IsEnabled": true,
+        "TextStyle": {
+          "HorizontalAlignment": 1,
+          "VerticalAlignment": 1,
+          "FontName": "Segoe UI",
+          "FontSize": 12.0,
+          "Underline": false,
+          "Bold": false,
+          "Italic": false,
+          "Strikeout": false,
+          "FontColor": "#FF505050"
+        }
+      },
+      "MemberLabelAngle": null,
+      "MemberLabelConfig": {
+        "IsEnabled": true,
+        "TextStyle": {
+          "HorizontalAlignment": 1,
+          "VerticalAlignment": 1,
+          "FontName": "Segoe UI",
+          "FontSize": 12.0,
+          "Underline": false,
+          "Bold": false,
+          "Italic": false,
+          "Strikeout": false,
+          "FontColor": "#FF505050"
+        }
+      },
+      "HasUncollatedMemberOrder": false,
+      "Custom": {
+        "MemberAxisOptions": {
+          "LabelFormat": 0,
+          "LineStyle": {
+            "Thickness": 1.0,
+            "Style": 0,
+            "Color": "#FFA1A8AD"
+          },
+          "GridLineStyle": {
+            "Thickness": 0.0,
+            "Style": 0,
+            "Color": "#FFA1A8AD"
+          },
+          "Size": 0,
+          "HiearchyLabelRotation": 0,
+          "HiearchyTextStyle": {
+            "HorizontalAlignment": 0,
+            "VerticalAlignment": 0,
+            "FontName": "Segoe UI",
+            "FontSize": 12.0,
+            "Underline": false,
+            "Bold": false,
+            "Italic": false,
+            "Strikeout": false,
+            "FontColor": "#FF505050"
+          }
+        }
+      }
+    },
+    "Custom": {
+      "ChartOptions": {
+        "IsComparisonLineEnabled": true,
+        "ColumnWidth": 2,
+        "ColumnStacking": 0,
+        "AreaStacking": 0,
+        "PlotAreaBackground": "#00000000"
+      },
+      "LegendOptions": {
+        "ReverseLegend": false
+      }
+    },
+    "Title": "Antal rejser på rejsekort pr. år",
+    "TitleTextStyle": {
+      "HorizontalAlignment": 1,
+      "VerticalAlignment": 1,
+      "FontName": "Segoe UI",
+      "FontSize": 21.0,
+      "Underline": false,
+      "Bold": true,
+      "Italic": false,
+      "Strikeout": false,
+      "FontColor": "#FF505050"
+    },
+    "TitleBackgroundColor": "#00FFFFFF",
+    "TitleBorderStyle": {
+      "BackgroundColor": "#00FFFFFF",
+      "BorderRadius": 0,
+      "BorderRadiusTopLeft": null,
+      "BorderRadiusTopRight": null,
+      "BorderRadiusBottomLeft": null,
+      "BorderRadiusBottomRight": null,
+      "BorderWidth": 0,
+      "BorderWidthTop": null,
+      "BorderWidthBottom": null,
+      "BorderWidthLeft": null,
+      "BorderWidthRight": null,
+      "BorderColor": "#FF606060",
+      "BorderColorTop": null,
+      "BorderColorBottom": null,
+      "BorderColorLeft": null,
+      "BorderColorRight": null,
+      "Padding": 0,
+      "PaddingTop": 2,
+      "PaddingBottom": 9,
+      "PaddingLeft": 12,
+      "PaddingRight": 12
+    },
+    "CustomText": [],
+    "CustomTextStyles": [],
+    "ColorPalettes": [
+      {
+        "Colors": [
+          "#FF38A800",
+          "#FF96BE0F",
+          "#FFFFC800",
+          "#FFF08200",
+          "#FFDC0014",
+          "#FFC8D700",
+          "#FF8C8C8C",
+          "#FF70A800",
+          "#FFA80000",
+          "#FF730000",
+          "#FF000000",
+          "#FF00AFC8",
+          "#FFC8C8C8"
+        ],
+        "Tag": null
+      }
+    ],
+    "Agents": [],
+    "MemberMetadata": [
+      {
+        "Id": {
+          "Database": "Rejsedata",
+          "Cube": "RejsedataOnline",
+          "Dimension": "Afgangsdato",
+          "Hierarchy": "År - Måned - Dato",
+          "Level": "År"
+        },
+        "DimensionIdx": 0,
+        "DimensionCaption": "Afgangsdato År - Måned - Dato",
+        "LevelCaption": "År",
+        "MemberPropertyCaption": null,
+        "AllowMultiselect": true
+      },
+      {
+        "Id": {
+          "Database": "Rejsedata",
+          "Cube": "RejsedataOnline",
+          "Measure": "Antal Personrejser"
+        },
+        "DimensionIdx": -1,
+        "DimensionCaption": null,
+        "LevelCaption": null,
+        "MemberPropertyCaption": null,
+        "AllowMultiselect": false
+      }
+    ],
+    "CellCriteriumValues": {
+      "X": [],
+      "Y": [
+        {
+          "Id": {
+            "Database": "Rejsedata",
+            "Cube": "RejsedataOnline",
+            "Dimension": "Afgangsdato",
+            "Hierarchy": "År - Måned - Dato"
+          },
+          "Members": [
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2013]",
+              "Name": "2013"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2014]",
+              "Name": "2014"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2015]",
+              "Name": "2015"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2016]",
+              "Name": "2016"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2017]",
+              "Name": "2017"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2018]",
+              "Name": "2018"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2019]",
+              "Name": "2019"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2020]",
+              "Name": "2020"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2021]",
+              "Name": "2021"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2022]",
+              "Name": "2022"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2023]",
+              "Name": "2023"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2024]",
+              "Name": "2024"
+            },
+            {
+              "Parent": -1,
+              "Key": "[Afgangsdato].[År - Måned - Dato].[År].&[2025]",
+              "Name": "2025"
+            }
+          ],
+          "Selected": [],
+          "AllowMultiselect": true,
+          "AutoExpandedLevelIdx": 0
+        }
+      ],
+      "Measures": [
+        {
+          "Database": "Rejsedata",
+          "Cube": "RejsedataOnline",
+          "Measure": "Antal Personrejser"
+        }
+      ],
+      "CellMemberRefs": [
+        -1,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        1,
+        -1,
+        1,
+        0,
+        2,
+        -1,
+        2,
+        0,
+        3,
+        -1,
+        3,
+        0,
+        4,
+        -1,
+        4,
+        0,
+        5,
+        -1,
+        5,
+        0,
+        6,
+        -1,
+        6,
+        0,
+        7,
+        -1,
+        7,
+        0,
+        8,
+        -1,
+        8,
+        0,
+        9,
+        -1,
+        9,
+        0,
+        10,
+        -1,
+        10,
+        0,
+        11,
+        -1,
+        11,
+        0,
+        12,
+        -1,
+        12,
+        0
+      ]
+    },
+    "BackgroundColor": "#00FFFFFF",
+    "DrillColor": "#00FFFFFF",
+    "UseDrillColor": false,
+    "HasTrigger": false,
+    "IsReducedDataset": false,
+    "CustomConfig": null,
+    "CustomPersistState": null,
+    "InstanceId": "ca43b1b7-e3d0-4b18-83df-4b10caef0abb",
+    "TextIsRightToLeft": false
+  }
+}
