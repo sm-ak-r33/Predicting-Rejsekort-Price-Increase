@@ -15,5 +15,6 @@ mlflow==2.2.2
 dagshub
 playwright
 pmdarima
+pandas
 dvc
  

@@ -3,32 +3,36 @@ ingest.py
 ---------
 Automated data ingestion from passagertal.dk (TARGIT Anywhere v26.3).
 
-The dashboard contains a crosstab table with a Year → Month → Day hierarchy.
-Clicking the "+" next to each year/month expands it to daily data.
-This script:
-  1. Opens the dashboard in headless Chromium
-  2. Clicks ALL "+" expand buttons repeatedly until no more appear
-     (Year → Month → Day, fully expanded)
-  3. Captures the resulting GetModel response which contains daily data
-  4. Parses Model.Rows → pandas DataFrame → Data(update).xlsx
+Root-cause of the original bug
+───────────────────────────────
+context.on("response", async_handler) has a race condition in Playwright Python:
+the async handler is *scheduled* but the response body buffer may already be
+released by the time `await response.json()` runs → silent empty capture.
+
+Fix: use page.route() which intercepts the request BEFORE the response is
+forwarded to the page, giving guaranteed access to the full body.
+
+What this script does
+──────────────────────
+1. Opens the dashboard in headless Chromium
+2. Intercepts all /Visual/GetModel POST responses via page.route()
+3. Waits for the page to fully render (TARGIT WASM bootstrap ~10-15 s)
+4. Picks the GetModel response with the most rows
+5. Parses Model.Rows → pandas DataFrame → Data(update).xlsx
 
 Usage:
     python pipeline/ingest.py
-
-Requirements:
-    playwright>=1.44   (pip install playwright && playwright install chromium)
-    pandas>=2.0        (pip install pandas)
-    openpyxl>=3.1      (pip install openpyxl)
 """
 
 import asyncio
 import json
 import logging
+import re
 from pathlib import Path
+from typing import Dict
 
 import pandas as pd
-from typing import Dict
-from playwright.async_api import async_playwright, Response
+from playwright.async_api import async_playwright, Route, Request
 
 # ---------------------------------------------------------------------------
 # Config
@@ -37,98 +41,54 @@ DASHBOARD_URL = (
     "https://passagertal.dk/Embed"
     "#vfs://Global/passagertal.dk/Rejsekort/Rejsekortrejser.xview"
 )
-GETMODEL_PATH = "/Visual/GetModel"
-OUTPUT_XLSX   = Path("Data(update).xlsx")
-TIMEOUT_S     = 180
+GETMODEL_PATH  = "/Visual/GetModel"
+OUTPUT_XLSX    = Path("Data(update).xlsx")
+PAGE_LOAD_WAIT = 20   # seconds to wait after domcontentloaded for WASM boot
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
 )
 log = logging.getLogger("ingest")
 
-# ---------------------------------------------------------------------------
-# Track ALL GetModel responses, keyed by ObjectId
-# We want the one with the most rows (= most drilled-down = daily data)
-# ---------------------------------------------------------------------------
-all_responses: Dict[str, dict] = {}   # objectId → latest response body
+# Shared store: objectId -> parsed response body
+all_responses: Dict[str, dict] = {}
 
 
 def object_id_from_url(url: str) -> str:
-    """Extract the raw GUID from a GetModel URL."""
-    import re
-    m = re.search(r"ObjectId=%7B([^%]+)%7D", url, re.IGNORECASE)
+    m = re.search(r"ObjectId=%7B([^%&]+)%7D", url, re.IGNORECASE)
     return m.group(1) if m else url
 
 
-async def handle_response(response: Response) -> None:
-    if GETMODEL_PATH not in response.url:
-        return
-    if response.status != 200:
-        return
-    try:
-        body = await response.json()
-    except Exception:
-        return
-
-    oid       = object_id_from_url(response.url)
-    state     = body.get("State", {})
-    row_count = state.get("CrosstabRowCount", 0)
-    title     = body.get("Model", {}).get("Title", "")
-
-    log.info(
-        "GetModel  rows=%-5s  title='%s'  id=%s",
-        row_count, title[:50], oid[:8] + "…"
-    )
-    all_responses[oid] = body
-
-
 # ---------------------------------------------------------------------------
-# Click all expand ("+" drill-down) buttons visible on the page
-# Returns the number of buttons clicked
+# Route handler - called for every /Visual/GetModel request
+# page.route() guarantees the body is available before we proceed
 # ---------------------------------------------------------------------------
-async def click_all_expand_buttons(page) -> int:
-    """
-    TARGIT renders expand/collapse controls as elements that:
-      - contain the text "+" or "−"
-      - OR have a CSS class containing 'expand', 'drill', 'toggle', 'open'
-      - OR are <td>/<span> with role="button" or a click handler
+async def intercept_getmodel(route: Route, request: Request) -> None:
+    # Let the request go through and get the real response
+    response = await route.fetch()
 
-    We try several selectors and click every visible one.
-    """
-    selectors = [
-        # Text content "+"
-        "text=+",
-        # Common TARGIT expand class patterns
-        "[class*='expand']",
-        "[class*='drill']",
-        "[class*='toggle']",
-        "[class*='lsExpand']",
-        "[class*='lsDrill']",
-        "[class*='tg-expand']",
-        # SVG/icon expand arrows
-        "svg[class*='expand']",
-        "span[class*='expand']",
-        "div[class*='expand']",
-        "td[class*='expand']",
-    ]
-
-    clicked = 0
-    for sel in selectors:
+    if response.status == 200:
         try:
-            elements = await page.locator(sel).all()
-            for el in elements:
-                try:
-                    if await el.is_visible():
-                        await el.click(timeout=2000)
-                        clicked += 1
-                        await asyncio.sleep(0.3)
-                except Exception:
-                    pass
-        except Exception:
-            pass
+            text = await response.text()
+            body = json.loads(text)
 
-    return clicked
+            oid       = object_id_from_url(request.url)
+            state     = body.get("State", {})
+            row_count = state.get("CrosstabRowCount", 0)
+            title     = body.get("Model", {}).get("Title", "")[:50]
+
+            log.info(
+                "GetModel captured  rows=%-5s  title='%s'  id=%s",
+                row_count, title, oid[:8] + "..."
+            )
+            all_responses[oid] = body
+
+        except Exception as e:
+            log.warning("Failed to parse GetModel response: %s", e)
+
+    # Forward the response to the page unchanged
+    await route.fulfill(response=response)
 
 
 # ---------------------------------------------------------------------------
@@ -145,60 +105,61 @@ async def ingest() -> None:
             viewport={"width": 1920, "height": 1080},
         )
         page = await context.new_page()
-        page.on("response", handle_response)
 
-        # ── 1. Load dashboard ────────────────────────────────────────────────
-        log.info("Opening dashboard …")
-        await page.goto(DASHBOARD_URL, wait_until="networkidle", timeout=TIMEOUT_S * 1000)
-        log.info("Page loaded. Objects captured so far: %d", len(all_responses))
-        await asyncio.sleep(3)
+        # Intercept GetModel BEFORE navigating so we catch every request
+        # from the very first paint, with no body-buffer race condition.
+        await page.route(f"**{GETMODEL_PATH}**", intercept_getmodel)
 
-        # ── 2. Drill down: click "+" buttons up to 3 levels deep ────────────
-        #    Level 1: expand years  → months appear
-        #    Level 2: expand months → days appear
-        #    Level 3: expand any remaining collapsed nodes
-        for level in range(1, 4):
-            log.info("Drill level %d — looking for expand buttons …", level)
-            n = await click_all_expand_buttons(page)
-            log.info("Clicked %d expand button(s) at level %d", n, level)
-            if n == 0:
-                log.info("No more expand buttons found — drill complete.")
-                break
-            # Wait for TARGIT to fire new GetModel requests after expansion
-            await page.wait_for_load_state("networkidle", timeout=30_000)
-            await asyncio.sleep(3)
+        # Navigate
+        log.info("Opening dashboard ...")
+        try:
+            await page.goto(
+                DASHBOARD_URL,
+                wait_until="domcontentloaded",
+                timeout=60_000,
+            )
+        except Exception as e:
+            log.warning("goto raised (non-fatal): %s", e)
+
+        # Give TARGIT's WASM time to initialise and fire all GetModel requests
+        log.info("Waiting %ds for TARGIT WASM to boot ...", PAGE_LOAD_WAIT)
+        await asyncio.sleep(PAGE_LOAD_WAIT)
 
         log.info("Total GetModel responses captured: %d", len(all_responses))
         await browser.close()
 
-    # ── 3. Pick the response with the most rows (= daily data) ──────────────
+    # Pick the response with the most rows
     if not all_responses:
-        raise RuntimeError("No GetModel responses captured at all.")
+        raise RuntimeError(
+            "No GetModel responses captured. "
+            "Check your network connection and that passagertal.dk is reachable."
+        )
 
     best_oid, best_body = max(
         all_responses.items(),
         key=lambda kv: kv[1].get("State", {}).get("CrosstabRowCount", 0),
     )
-    best_rows = best_body.get("State", {}).get("CrosstabRowCount", 0)
+    best_rows  = best_body.get("State", {}).get("CrosstabRowCount", 0)
     best_title = best_body.get("Model", {}).get("Title", "")
     log.info(
-        "Using object %s — '%s' (%d rows)",
-        best_oid[:8] + "…", best_title, best_rows
+        "Using object %s - '%s' (%d rows)",
+        best_oid[:8] + "...", best_title, best_rows
     )
 
     # Save raw JSON for debugging
     Path("data_raw.json").write_text(
         json.dumps(best_body, indent=2, ensure_ascii=False)
     )
+    log.info("Raw JSON saved -> data_raw.json")
 
-    # ── 4. Parse Model.Rows → DataFrame ─────────────────────────────────────
+    # Parse and save
     df = parse_rows(best_body)
     df.to_excel(OUTPUT_XLSX, index=False)
-    log.info("Saved %d rows → %s", len(df), OUTPUT_XLSX)
+    log.info("Saved %d rows -> %s", len(df), OUTPUT_XLSX)
 
 
 # ---------------------------------------------------------------------------
-# Parse Model.Rows into a tidy DataFrame
+# Parse Model.Rows -> tidy DataFrame
 # ---------------------------------------------------------------------------
 def parse_rows(body: dict) -> pd.DataFrame:
     model   = body.get("Model", {})
@@ -207,9 +168,10 @@ def parse_rows(body: dict) -> pd.DataFrame:
 
     if not rows:
         raise ValueError(
-            "Model.Rows is empty. Check data_raw.json for the response structure."
+            "Model.Rows is empty - check data_raw.json for response structure."
         )
 
+    # Column headers
     col_names = [
         c.get("Member", {}).get("ClickableLabel", {}).get("LabelText", f"Col_{i}")
         for i, c in enumerate(columns)
@@ -222,18 +184,23 @@ def parse_rows(body: dict) -> pd.DataFrame:
                .get("ClickableLabel", {})
                .get("LabelText", "")
         )
-        values = row.get("Values", [])
         record = {"Dato": label}
-        for j, val_obj in enumerate(values):
+        for j, val_obj in enumerate(row.get("Values", [])):
             numeric = val_obj.get("NumericValue", {})
-            hint    = val_obj.get("ClickableLabel", {}).get("Clickable", {}).get("HintText", "")
+            hint    = (
+                val_obj.get("ClickableLabel", {})
+                       .get("Clickable", {})
+                       .get("HintText", "")
+            )
             measure = col_names[j] if j < len(col_names) else f"Col_{j}"
-            # NumericValue.Value is the raw number; HintText has the formatted string
             record[measure] = numeric.get("Value") if numeric else hint
         records.append(record)
 
     df = pd.DataFrame(records)
-    log.info("Parsed %d rows × %d cols: %s", *df.shape, df.columns.tolist())
+    log.info(
+        "Parsed %d rows x %d cols: %s",
+        len(df), len(df.columns), df.columns.tolist()
+    )
     log.info("Sample:\n%s", df.head(5).to_string(index=False))
     return df
 

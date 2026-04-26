@@ -55,3 +55,15 @@ stages:
       hash: md5
       md5: 292b026b47180e21991024c097d0c2d6
       size: 4704
+  ingest:
+    cmd: python pipeline/ingest.py
+    deps:
+    - path: pipeline/ingest.py
+      hash: md5
+      md5: 664f0ab3cd8cfb7101eafddb5faa19a0
+      size: 7218
+    outs:
+    - path: Data(update).xlsx
+      hash: md5
+      md5: 5b6fb98d33343895ac170ad0b126e90c
+      size: 5193
