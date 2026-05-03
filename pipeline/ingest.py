@@ -1,209 +1,321 @@
 """
-ingest.py
----------
-Automated data ingestion from passagertal.dk (TARGIT Anywhere v26.3).
+ingest_playwright_click.py
 
-Root-cause of the original bug
-───────────────────────────────
-context.on("response", async_handler) has a race condition in Playwright Python:
-the async handler is *scheduled* but the response body buffer may already be
-released by the time `await response.json()` runs → silent empty capture.
+Browser-driven scraper for passagertal.dk Rejsekort daily passenger data.
 
-Fix: use page.route() which intercepts the request BEFORE the response is
-forwarded to the page, giving guaranteed access to the full body.
+This uses Playwright to open the TARGIT dashboard, click/drill through the visual UI,
+read the rendered VirtualGrid text, parse date + Antal Personrejser pairs, and write
+Data(update).xlsx.
 
-What this script does
-──────────────────────
-1. Opens the dashboard in headless Chromium
-2. Intercepts all /Visual/GetModel POST responses via page.route()
-3. Waits for the page to fully render (TARGIT WASM bootstrap ~10-15 s)
-4. Picks the GetModel response with the most rows
-5. Parses Model.Rows → pandas DataFrame → Data(update).xlsx
+Install:
+    pip install playwright pandas openpyxl
+    playwright install chromium
 
-Usage:
-    python pipeline/ingest.py
+Run:
+    python ingest_playwright_click.py --year 2025 --output "Data(update).xlsx"
+
+Debug mode:
+    python ingest_playwright_click.py --year 2025 --headful --output "Data(update).xlsx"
 """
 
+import argparse
 import asyncio
-import json
-import logging
 import re
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Iterable, List, Optional, Tuple
 
 import pandas as pd
-from playwright.async_api import async_playwright, Route, Request
+from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError, async_playwright
 
-# ---------------------------------------------------------------------------
-# Config
-# ---------------------------------------------------------------------------
-DASHBOARD_URL = (
-    "https://passagertal.dk/Embed"
-    "#vfs://Global/passagertal.dk/Rejsekort/Rejsekortrejser.xview"
-)
-GETMODEL_PATH  = "/Visual/GetModel"
-OUTPUT_XLSX    = Path("Data(update).xlsx")
-PAGE_LOAD_WAIT = 20   # seconds to wait after domcontentloaded for WASM boot
+URL = "https://passagertal.dk/Embed#vfs://Global/passagertal.dk/Rejsekort/Rejsekortrejser.xview"
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
-)
-log = logging.getLogger("ingest")
+DANISH_MONTHS = {
+    1: "Jan",
+    2: "Feb",
+    3: "Mar",
+    4: "Apr",
+    5: "Maj",
+    6: "Jun",
+    7: "Jul",
+    8: "Aug",
+    9: "Sep",
+    10: "Okt",
+    11: "Nov",
+    12: "Dec",
+}
 
-# Shared store: objectId -> parsed response body
-all_responses: Dict[str, dict] = {}
-
-
-def object_id_from_url(url: str) -> str:
-    m = re.search(r"ObjectId=%7B([^%&]+)%7D", url, re.IGNORECASE)
-    return m.group(1) if m else url
+DATE_RE = re.compile(r"\b(\d{2}-\d{2}-\d{4})\b")
+NUM_RE = re.compile(r"^[0-9][0-9.\s,]*$")
 
 
-# ---------------------------------------------------------------------------
-# Route handler - called for every /Visual/GetModel request
-# page.route() guarantees the body is available before we proceed
-# ---------------------------------------------------------------------------
-async def intercept_getmodel(route: Route, request: Request) -> None:
-    # Let the request go through and get the real response
-    response = await route.fetch()
+@dataclass(frozen=True)
+class Row:
+    date: str
+    antal_personrejser: int
 
-    if response.status == 200:
+
+def clean_number(value: str) -> Optional[int]:
+    value = value.strip().replace(".", "").replace(" ", "").replace(",", "")
+    if not value.isdigit():
+        return None
+    return int(value)
+
+
+def parse_grid_text(text: str) -> List[Row]:
+    """Parse rendered grid text containing alternating date/value rows."""
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    rows: List[Row] = []
+
+    i = 0
+    while i < len(lines):
+        m = DATE_RE.search(lines[i])
+        if not m:
+            i += 1
+            continue
+
+        date_s = m.group(1)
+        value: Optional[int] = None
+
+        # Usually value is next line, but scan a few lines to be robust.
+        for j in range(i + 1, min(i + 5, len(lines))):
+            if DATE_RE.search(lines[j]):
+                break
+            if NUM_RE.match(lines[j]):
+                value = clean_number(lines[j])
+                if value is not None:
+                    break
+
+        if value is not None:
+            rows.append(Row(date=date_s, antal_personrejser=value))
+        i += 1
+
+    return rows
+
+
+async def wait_for_dashboard(page: Page) -> None:
+    """Wait until the TARGIT shell and visible dashboard have loaded."""
+    await page.goto(URL, wait_until="domcontentloaded")
+
+    # Wait for auth/doc/cube bootstrap endpoints. These are reliable signs of real dashboard init.
+    try:
+        await page.wait_for_response(lambda r: "Documents/GetDocument" in r.url, timeout=60_000)
+    except PlaywrightTimeoutError:
+        pass
+
+    try:
+        await page.wait_for_response(lambda r: "server/connections" in r.url, timeout=60_000)
+    except PlaywrightTimeoutError:
+        pass
+
+    # Allow Blazor/canvas rendering to finish.
+    await page.wait_for_timeout(10_000)
+
+
+async def get_grid_text(page: Page) -> str:
+    """Return the largest visible VirtualGrid text block."""
+    grids = page.locator("div.VirtualGrid")
+    count = await grids.count()
+    texts: List[str] = []
+    for i in range(count):
         try:
-            text = await response.text()
-            body = json.loads(text)
+            txt = await grids.nth(i).inner_text(timeout=2_000)
+            if "Antal Personrejser" in txt or DATE_RE.search(txt):
+                texts.append(txt)
+        except Exception:
+            continue
 
-            oid       = object_id_from_url(request.url)
-            state     = body.get("State", {})
-            row_count = state.get("CrosstabRowCount", 0)
-            title     = body.get("Model", {}).get("Title", "")[:50]
+    if texts:
+        return max(texts, key=len)
 
-            log.info(
-                "GetModel captured  rows=%-5s  title='%s'  id=%s",
-                row_count, title, oid[:8] + "..."
-            )
-            all_responses[oid] = body
-
-        except Exception as e:
-            log.warning("Failed to parse GetModel response: %s", e)
-
-    # Forward the response to the page unchanged
-    await route.fulfill(response=response)
+    # Fallback: whole page text. Less clean, but often still parseable.
+    try:
+        return await page.locator("body").inner_text(timeout=5_000)
+    except Exception:
+        return ""
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-async def ingest() -> None:
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(
-            headless=True,
-            args=["--no-sandbox", "--disable-setuid-sandbox"],
+async def click_text_if_available(page: Page, text: str, timeout: int = 2_000) -> bool:
+    candidates = [
+        page.get_by_text(text, exact=True),
+        page.locator(f"text={text}"),
+    ]
+    for loc in candidates:
+        try:
+            if await loc.count() > 0:
+                await loc.first.click(timeout=timeout)
+                return True
+        except Exception:
+            continue
+    return False
+
+
+async def click_year(page: Page, year: int) -> bool:
+    # Try simple text click first.
+    if await click_text_if_available(page, str(year), timeout=3_000):
+        await page.wait_for_timeout(2_000)
+        return True
+
+    # Fallback: click approximate year labels in crosstab cells.
+    cells = page.locator("div.CrosstabCellInner")
+    n = await cells.count()
+    for i in range(n):
+        try:
+            txt = (await cells.nth(i).inner_text(timeout=500)).strip()
+            if txt == str(year):
+                await cells.nth(i).click(timeout=2_000)
+                await page.wait_for_timeout(2_000)
+                return True
+        except Exception:
+            continue
+    return False
+
+
+async def click_month(page: Page, month: int) -> bool:
+    label = DANISH_MONTHS[month]
+    if await click_text_if_available(page, label, timeout=3_000):
+        await page.wait_for_timeout(2_000)
+        return True
+
+    cells = page.locator("div.CrosstabCellInner")
+    n = await cells.count()
+    for i in range(n):
+        try:
+            txt = (await cells.nth(i).inner_text(timeout=500)).strip()
+            if txt == label:
+                await cells.nth(i).click(timeout=2_000)
+                await page.wait_for_timeout(2_000)
+                return True
+        except Exception:
+            continue
+    return False
+
+
+async def nudge_grid_scroll(page: Page, steps: int = 6) -> None:
+    """Scroll inside the grid so lazy-rendered rows become visible."""
+    grid = page.locator("div.VirtualGrid").first
+    try:
+        box = await grid.bounding_box(timeout=2_000)
+        if not box:
+            return
+        x = box["x"] + box["width"] / 2
+        y = box["y"] + box["height"] / 2
+        await page.mouse.move(x, y)
+        for _ in range(steps):
+            await page.mouse.wheel(0, 700)
+            await page.wait_for_timeout(300)
+    except Exception:
+        return
+
+
+async def scrape_month(page: Page, year: int, month: int) -> List[Row]:
+    before = await get_grid_text(page)
+
+    clicked = await click_month(page, month)
+    if not clicked:
+        print(f"WARN: Could not click month {month:02d}; trying to parse current grid anyway.")
+
+    try:
+        await page.wait_for_response(lambda r: "server/connections" in r.url or "Visual/GetModel" in r.url, timeout=8_000)
+    except PlaywrightTimeoutError:
+        pass
+
+    await page.wait_for_timeout(2_000)
+
+    # Capture top + scroll-rendered rows.
+    texts = [await get_grid_text(page)]
+    await nudge_grid_scroll(page, steps=10)
+    texts.append(await get_grid_text(page))
+
+    rows_by_date: Dict[str, Row] = {}
+    for txt in texts:
+        for row in parse_grid_text(txt):
+            try:
+                dt = datetime.strptime(row.date, "%d-%m-%Y")
+            except ValueError:
+                continue
+            if dt.year == year and dt.month == month:
+                rows_by_date[row.date] = row
+
+    # If we got nothing but page changed, include debug print to help troubleshoot.
+    if not rows_by_date:
+        after = texts[-1]
+        Path("debug_passagertal").mkdir(exist_ok=True)
+        Path(f"debug_passagertal/grid_{year}_{month:02d}.txt").write_text(after, encoding="utf-8")
+        if after == before:
+            print(f"WARN: Month {month:02d} click did not change grid text.")
+        else:
+            print(f"WARN: Month {month:02d} changed grid but no rows parsed. Saved debug grid text.")
+
+    return [rows_by_date[k] for k in sorted(rows_by_date.keys(), key=lambda s: datetime.strptime(s, "%d-%m-%Y"))]
+
+
+async def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--year", type=int, default=datetime.now().year - 1)
+    parser.add_argument("--output", default="Data(update).xlsx")
+    parser.add_argument("--headful", action="store_true", help="Show browser window")
+    parser.add_argument("--months", default="1-12", help="Month range, e.g. 1-12 or 2,3,4")
+    args = parser.parse_args()
+
+    if "-" in args.months:
+        a, b = args.months.split("-", 1)
+        months = list(range(int(a), int(b) + 1))
+    else:
+        months = [int(x) for x in args.months.split(",") if x.strip()]
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(
+            headless=not args.headful,
+            args=["--disable-blink-features=AutomationControlled"],
         )
         context = await browser.new_context(
+            viewport={"width": 1440, "height": 1000},
             locale="da-DK",
-            viewport={"width": 1920, "height": 1080},
+            timezone_id="Europe/Copenhagen",
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+            ),
         )
         page = await context.new_page()
 
-        # Intercept GetModel BEFORE navigating so we catch every request
-        # from the very first paint, with no body-buffer race condition.
-        await page.route(f"**{GETMODEL_PATH}**", intercept_getmodel)
+        print("Opening dashboard...")
+        await wait_for_dashboard(page)
 
-        # Navigate
-        log.info("Opening dashboard ...")
-        try:
-            await page.goto(
-                DASHBOARD_URL,
-                wait_until="domcontentloaded",
-                timeout=60_000,
-            )
-        except Exception as e:
-            log.warning("goto raised (non-fatal): %s", e)
+        print(f"Selecting year {args.year}...")
+        if not await click_year(page, args.year):
+            print(f"WARN: Could not click year {args.year}. Continuing with current dashboard state.")
 
-        # Give TARGIT's WASM time to initialise and fire all GetModel requests
-        log.info("Waiting %ds for TARGIT WASM to boot ...", PAGE_LOAD_WAIT)
-        await asyncio.sleep(PAGE_LOAD_WAIT)
+        all_rows: Dict[str, Row] = {}
+        for month in months:
+            print(f"Scraping {args.year}-{month:02d}...")
+            rows = await scrape_month(page, args.year, month)
+            print(f"  rows: {len(rows)}")
+            for row in rows:
+                all_rows[row.date] = row
 
-        log.info("Total GetModel responses captured: %d", len(all_responses))
         await browser.close()
 
-    # Pick the response with the most rows
-    if not all_responses:
-        raise RuntimeError(
-            "No GetModel responses captured. "
-            "Check your network connection and that passagertal.dk is reachable."
-        )
-
-    best_oid, best_body = max(
-        all_responses.items(),
-        key=lambda kv: kv[1].get("State", {}).get("CrosstabRowCount", 0),
-    )
-    best_rows  = best_body.get("State", {}).get("CrosstabRowCount", 0)
-    best_title = best_body.get("Model", {}).get("Title", "")
-    log.info(
-        "Using object %s - '%s' (%d rows)",
-        best_oid[:8] + "...", best_title, best_rows
+    df = pd.DataFrame(
+        [
+            {
+                "Afgangsdato": datetime.strptime(r.date, "%d-%m-%Y").date(),
+                "Antal Personrejser": r.antal_personrejser,
+            }
+            for r in sorted(all_rows.values(), key=lambda x: datetime.strptime(x.date, "%d-%m-%Y"))
+        ]
     )
 
-    # Save raw JSON for debugging
-    Path("data_raw.json").write_text(
-        json.dumps(best_body, indent=2, ensure_ascii=False)
-    )
-    log.info("Raw JSON saved -> data_raw.json")
+    output = Path(args.output)
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Data")
 
-    # Parse and save
-    df = parse_rows(best_body)
-    df.to_excel(OUTPUT_XLSX, index=False)
-    log.info("Saved %d rows -> %s", len(df), OUTPUT_XLSX)
-
-
-# ---------------------------------------------------------------------------
-# Parse Model.Rows -> tidy DataFrame
-# ---------------------------------------------------------------------------
-def parse_rows(body: dict) -> pd.DataFrame:
-    model   = body.get("Model", {})
-    rows    = model.get("Rows", [])
-    columns = model.get("Columns", [])
-
-    if not rows:
-        raise ValueError(
-            "Model.Rows is empty - check data_raw.json for response structure."
-        )
-
-    # Column headers
-    col_names = [
-        c.get("Member", {}).get("ClickableLabel", {}).get("LabelText", f"Col_{i}")
-        for i, c in enumerate(columns)
-    ] or ["Antal Personrejser"]
-
-    records = []
-    for row in rows:
-        label = (
-            row.get("Member", {})
-               .get("ClickableLabel", {})
-               .get("LabelText", "")
-        )
-        record = {"Dato": label}
-        for j, val_obj in enumerate(row.get("Values", [])):
-            numeric = val_obj.get("NumericValue", {})
-            hint    = (
-                val_obj.get("ClickableLabel", {})
-                       .get("Clickable", {})
-                       .get("HintText", "")
-            )
-            measure = col_names[j] if j < len(col_names) else f"Col_{j}"
-            record[measure] = numeric.get("Value") if numeric else hint
-        records.append(record)
-
-    df = pd.DataFrame(records)
-    log.info(
-        "Parsed %d rows x %d cols: %s",
-        len(df), len(df.columns), df.columns.tolist()
-    )
-    log.info("Sample:\n%s", df.head(5).to_string(index=False))
-    return df
+    print(f"Saved {output} with {len(df)} rows")
+    if len(df) == 0:
+        print("No rows parsed. Re-run with --headful and inspect debug_passagertal/grid_*.txt")
 
 
 if __name__ == "__main__":
-    asyncio.run(ingest())
+    asyncio.run(main())
